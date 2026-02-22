@@ -100,4 +100,30 @@ router.get('/me', authMiddleware, (req, res) => {
   }
 });
 
+// DELETE /api/auth/me — Delete current user and all data (requires auth)
+router.delete('/me', authMiddleware, (req, res) => {
+  try {
+    const userId = req.userId;
+
+    // Use a transaction to ensure all data is deleted or none
+    const deleteAccountTx = db.transaction(() => {
+      // 1. Delete trips
+      db.prepare('DELETE FROM trips WHERE user_id = ?').run(userId);
+
+      // 2. Delete fuel settings history
+      db.prepare('DELETE FROM fuel_settings_history WHERE user_id = ?').run(userId);
+
+      // 3. Delete user
+      db.prepare('DELETE FROM users WHERE id = ?').run(userId);
+    });
+
+    deleteAccountTx();
+
+    res.json({ message: 'Account and all associated data deleted successfully' });
+  } catch (err) {
+    console.error('Error deleting account:', err);
+    res.status(500).json({ error: 'Failed to delete account' });
+  }
+});
+
 module.exports = router;
