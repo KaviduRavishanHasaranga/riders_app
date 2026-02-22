@@ -71,15 +71,26 @@ db.exec(`
 `);
 
 // --- Run migrations for existing databases ---
-console.log('Running database migrations...');
-addColumnIfNotExists('trips', 'user_id', "INTEGER NOT NULL DEFAULT 0");
-addColumnIfNotExists('trips', 'trip_time', "TEXT DEFAULT ''");
-addColumnIfNotExists('fuel_settings_history', 'user_id', "INTEGER NOT NULL DEFAULT 0");
+console.log("Running database migrations...");
+addColumnIfNotExists("trips", "user_id", "INTEGER NOT NULL DEFAULT 0");
+addColumnIfNotExists("trips", "trip_time", "TEXT DEFAULT ''");
+addColumnIfNotExists("trips", "trip_id", "TEXT DEFAULT ''");
+addColumnIfNotExists(
+  "fuel_settings_history",
+  "user_id",
+  "INTEGER NOT NULL DEFAULT 0",
+);
 
 // Create indexes for new columns
-try { db.exec('CREATE INDEX IF NOT EXISTS idx_trips_user_id ON trips(user_id)'); } catch(e) {}
-try { db.exec('CREATE INDEX IF NOT EXISTS idx_fuel_user_id ON fuel_settings_history(user_id)'); } catch(e) {}
+try {
+  db.exec("CREATE INDEX IF NOT EXISTS idx_trips_user_id ON trips(user_id)");
+} catch (e) {}
+try {
+  db.exec(
+    "CREATE INDEX IF NOT EXISTS idx_fuel_user_id ON fuel_settings_history(user_id)",
+  );
+} catch (e) {}
 
-console.log('Database ready.');
+console.log("Database ready.");
 
 module.exports = db;

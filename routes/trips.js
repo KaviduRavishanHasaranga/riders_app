@@ -34,15 +34,15 @@ router.post('/', (req, res) => {
       return res.status(400).json({ error: 'Validation failed', details: errors });
     }
 
-    const { date, trip_time = '', app_name, trip_type, distance_km, amount_received, fees, fuel_cost = 0, notes = '' } = req.body;
+    const { date, trip_time = '', trip_id = '', app_name, trip_type, distance_km, amount_received, fees, fuel_cost = 0, notes = '' } = req.body;
     const net_profit = amount_received - fees - fuel_cost;
 
     const stmt = db.prepare(`
-      INSERT INTO trips (user_id, date, trip_time, app_name, trip_type, distance_km, amount_received, fees, fuel_cost, net_profit, notes)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO trips (user_id, date, trip_time, trip_id, app_name, trip_type, distance_km, amount_received, fees, fuel_cost, net_profit, notes)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
 
-    const result = stmt.run(req.userId, date, trip_time, app_name, trip_type, distance_km, amount_received, fees, fuel_cost, net_profit, notes);
+    const result = stmt.run(req.userId, date, trip_time, trip_id, app_name, trip_type, distance_km, amount_received, fees, fuel_cost, net_profit, notes);
 
     const trip = db.prepare('SELECT * FROM trips WHERE id = ?').get(result.lastInsertRowid);
     res.status(201).json(trip);
@@ -112,17 +112,17 @@ router.put('/:id', (req, res) => {
       return res.status(400).json({ error: 'Validation failed', details: errors });
     }
 
-    const { date, trip_time = '', app_name, trip_type, distance_km, amount_received, fees, fuel_cost = 0, notes = '' } = req.body;
+    const { date, trip_time = '', trip_id = '', app_name, trip_type, distance_km, amount_received, fees, fuel_cost = 0, notes = '' } = req.body;
     const net_profit = amount_received - fees - fuel_cost;
 
     const stmt = db.prepare(`
       UPDATE trips
-      SET date = ?, trip_time = ?, app_name = ?, trip_type = ?, distance_km = ?, amount_received = ?,
+      SET date = ?, trip_time = ?, trip_id = ?, app_name = ?, trip_type = ?, distance_km = ?, amount_received = ?,
           fees = ?, fuel_cost = ?, net_profit = ?, notes = ?, updated_at = datetime('now', 'localtime')
       WHERE id = ? AND user_id = ?
     `);
 
-    stmt.run(date, trip_time, app_name, trip_type, distance_km, amount_received, fees, fuel_cost, net_profit, notes, req.params.id, req.userId);
+    stmt.run(date, trip_time, trip_id, app_name, trip_type, distance_km, amount_received, fees, fuel_cost, net_profit, notes, req.params.id, req.userId);
 
     const trip = db.prepare('SELECT * FROM trips WHERE id = ?').get(req.params.id);
     res.json(trip);
